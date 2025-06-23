@@ -1,0 +1,32 @@
+ CREATE TABLE IF NOT EXISTS i94_immigration (
+    record_id STRING PRIMARY KEY,
+    arrival_year INT,
+    arrival_month INT,
+    citizenship_country_code INT,
+    residence_country_code INT,
+    us_port_of_entry_code STRING,
+    arrival_date DATE,
+    mode_of_transport_code INT,
+    us_state_code STRING,
+    departure_date DATE,
+    age INT,
+    visa_category_code INT,
+    traveler_count INT,
+    file_added_date DATE,
+    visa_issued_post_code STRING,
+    occupation STRING,
+    entry_flag STRING,
+    departure_flag STRING,
+    update_flag STRING,
+    match_flag STRING,
+    birth_year INT,
+    admitted_until_date DATE,
+    gender STRING,
+    ins_number INT,
+    airline_code STRING,
+    admission_number INT,
+    flight_number STRING,
+    visa_type STRING
+     )
+     ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+     LOCATION 's3://myawsbucketfk11/i94_immigration/';
