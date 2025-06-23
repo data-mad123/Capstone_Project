@@ -26,16 +26,16 @@ DEFAULT_DATA_QUALITY_RULESET = """
     ]
 """
 
-# Script generated for node Date table
-Datetable_node1750612051687 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="date_code", transformation_ctx="Datetable_node1750612051687")
+# Script generated for node Immigration Table
+ImmigrationTable_node1750677161294 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="i94_immigration", transformation_ctx="ImmigrationTable_node1750677161294")
 
-# Script generated for node Country code table
-Countrycodetable_node1750659500926 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="country_code", transformation_ctx="Countrycodetable_node1750659500926")
+# Script generated for node Date Code Table
+DateCodeTable_node1750677163691 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="date_code", transformation_ctx="DateCodeTable_node1750677163691")
 
-# Script generated for node AWS Glue Data Catalog
-AWSGlueDataCatalog_node1750675988558 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="i94_immigration", transformation_ctx="AWSGlueDataCatalog_node1750675988558")
+# Script generated for node Country Code Table
+CountryCodeTable_node1750677167038 = glueContext.create_dynamic_frame.from_catalog(database="database", table_name="country_code", transformation_ctx="CountryCodeTable_node1750677167038")
 
-# Script generated for node Add feature engineering to existing columns
+# Script generated for node SQL Query
 SqlQuery0 = '''
 SELECT 
 immigration.record_id,
@@ -74,10 +74,12 @@ LEFT JOIN date_code d4 on immigration.admitted_until_date = d4.sas_date
 LEFT JOIN country_code c1 on immigration.citizenship_country_code = c1.code
 LEFT JOIN country_code c2 on immigration.residence_country_code = c1.code;
 '''
-Addfeatureengineeringtoexistingcolumns_node1750611928686 = sparkSqlQuery(glueContext, query = SqlQuery0, mapping = {"date_code":Datetable_node1750612051687, "country_code":Countrycodetable_node1750659500926, "immigration":AWSGlueDataCatalog_node1750675988558}, transformation_ctx = "Addfeatureengineeringtoexistingcolumns_node1750611928686")
+SQLQuery_node1750677239798 = sparkSqlQuery(glueContext, query = SqlQuery0, mapping = {"country_code":CountryCodeTable_node1750677167038, "immigration":ImmigrationTable_node1750677161294, "date_code":DateCodeTable_node1750677163691}, transformation_ctx = "SQLQuery_node1750677239798")
 
 # Script generated for node Amazon S3
-EvaluateDataQuality().process_rows(frame=Addfeatureengineeringtoexistingcolumns_node1750611928686, ruleset=DEFAULT_DATA_QUALITY_RULESET, publishing_options={"dataQualityEvaluationContext": "EvaluateDataQuality_node1750611882392", "enableDataQualityResultsPublishing": True}, additional_options={"dataQualityResultsPublishing.strategy": "BEST_EFFORT", "observations.scope": "ALL"})
-AmazonS3_node1750613344623 = glueContext.write_dynamic_frame.from_options(frame=Addfeatureengineeringtoexistingcolumns_node1750611928686, connection_type="s3", format="glueparquet", connection_options={"path": "s3://myawsbucketfk11/i94_immigration_curated/", "partitionKeys": []}, format_options={"compression": "uncompressed"}, transformation_ctx="AmazonS3_node1750613344623")
-
+EvaluateDataQuality().process_rows(frame=SQLQuery_node1750677239798, ruleset=DEFAULT_DATA_QUALITY_RULESET, publishing_options={"dataQualityEvaluationContext": "EvaluateDataQuality_node1750677081664", "enableDataQualityResultsPublishing": True}, additional_options={"dataQualityResultsPublishing.strategy": "BEST_EFFORT", "observations.scope": "ALL"})
+AmazonS3_node1750677264449 = glueContext.getSink(path="s3://myawsbucketfk11/i94_immigration_curated/", connection_type="s3", updateBehavior="UPDATE_IN_DATABASE", partitionKeys=[], enableUpdateCatalog=True, transformation_ctx="AmazonS3_node1750677264449")
+AmazonS3_node1750677264449.setCatalogInfo(catalogDatabase="database",catalogTableName="immigration_curated")
+AmazonS3_node1750677264449.setFormat("glueparquet", compression="snappy")
+AmazonS3_node1750677264449.writeFrame(SQLQuery_node1750677239798)
 job.commit()
